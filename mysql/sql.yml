@@ -1,0 +1,76 @@
+account_select:
+  _: sql param will be replaced from theme settings.
+  sql: |
+    select 
+    a.id,
+    a.username,
+    email.email,
+    org.name
+    from account as a
+    inner join _table_where_email_is_    as email on a.id=email.account_id
+    inner join _table_where_org_name_is_ as org on email.org_id=org.id
+    where 
+    not isnull(a.activated) and 
+    email.email=?
+    ;
+  select:
+    - id
+    - username
+    - email
+    - org_name
+  params:
+    -
+      type: s
+      value: 'get:email'
+account_forgot_insert:
+  sql: insert into account_forgot (id, account_id, session_id, created_by) values (?, ?, ?, '[user_id]');
+  params:
+    -
+      type: s
+      value: rs:id
+    -
+      type: s
+      value: rs:account_id
+    -
+      type: s
+      value: rs:session_id
+account_forgot_select_one:
+  sql: |
+    select
+    forgot.id,
+    forgot.created_at,
+    account.email,
+    account.id as account_id,
+    (hour(timediff(forgot.created_at, now()))) as hours,
+    account.username
+    from account_forgot as forgot
+    inner join account as account on forgot.account_id=account.id
+    where forgot.id=? and isnull(forgot.success_at)
+    having hours<=5
+    ;
+  params:
+    -
+      type: s
+      value: rs:id
+  select:
+    - id
+    - created_at
+    - email
+    - account_id
+    - hours
+    - username
+account_update_password:
+  sql: update account set password=? where id=?
+  params:
+    -
+      type: s
+      value: rs:password
+    -
+      type: s
+      value: rs:account_id
+account_forgot_update_success:
+  sql: update account_forgot set success_at=now() where id=?
+  params:
+    -
+      type: s
+      value: rs:id

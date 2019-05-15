@@ -1,0 +1,17 @@
+-
+  type: div
+  attribute:
+    class: alert alert-primary
+    id: restore_details
+  innerHTML:
+    -
+      type: div
+      innerHTML:
+        -
+          type: strong
+          innerHTML: Username
+        -
+          type: span
+          innerHTML: rs:username
+      
+      

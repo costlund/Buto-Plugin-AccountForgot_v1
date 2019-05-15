@@ -1,0 +1,33 @@
+url: '/account_forgot/restore_capture'
+ajax: true
+submit_value: Update password
+id: frm_restore
+items:
+  id:
+    type: hidden
+    label: id
+    mandatory: true
+    default: get:id
+  password:
+    type: password
+    label: Password
+    mandatory: true
+    validator:
+      -
+        plugin: form/form_v1
+        method: validate_password
+  password2:
+    type: password
+    label: Repeat password
+    mandatory: true
+    validator:
+      -
+        plugin: form/form_v1
+        method: validate_password
+      -
+        plugin: account/forgot_v1
+        method: validate_password
+capture:
+  plugin: account/forgot_v1
+  method: restore_capture
+    

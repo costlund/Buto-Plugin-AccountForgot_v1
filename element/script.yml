@@ -1,0 +1,9 @@
+-
+  type: widget
+  data:
+    plugin: 'wf/embed'
+    method: embed
+    data:
+      type: script
+      file: /plugin/account/forgot_v1/js/PluginAccountForgot_v1.js
+    

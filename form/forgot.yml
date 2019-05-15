@@ -1,0 +1,19 @@
+url: '/account_forgot/capture'
+ajax: true
+submit_value: Send
+id: frm_forgot
+items:
+  email:
+    type: varchar
+    label: Email
+    mandatory: true
+    validator:
+      -
+        plugin: form/form_v1
+        method: validate_email
+capture:
+  plugin: account/forgot_v1
+  method: capture
+elements_above: data:forgot_elements_above
+    
+    

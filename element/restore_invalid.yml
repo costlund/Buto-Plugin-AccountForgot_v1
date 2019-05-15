@@ -1,0 +1,5 @@
+-
+  type: div
+  attribute:
+    class: alert alert-warning
+  innerHTML: Could not find any password to restore.

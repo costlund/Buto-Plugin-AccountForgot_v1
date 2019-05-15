@@ -1,0 +1,7 @@
+-
+  type: div
+  attribute:
+    class: alert alert-success
+    id: restore_done
+    style: 'display:none'
+  innerHTML: Your password was reset.

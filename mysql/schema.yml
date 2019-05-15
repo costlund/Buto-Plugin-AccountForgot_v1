@@ -1,0 +1,30 @@
+tables:
+  account_forgot:
+    _description: ''
+    field:
+      id:
+        primary_key: true
+        type: varchar(50)
+        not_null: true
+      account_id:
+        type: varchar(50)
+        foreing_key:
+          reference_table: account
+          reference_field: id
+          on_delete: CASCADE
+          on_update: CASCADE
+      session_id:
+        type: varchar(255)
+      success_at:
+        type: timestamp
+extra:
+  field:
+    created_at:
+      type: timestamp
+      default: CURRENT_TIMESTAMP
+    updated_at:
+      type: timestamp
+    created_by:
+      type: varchar(50)
+    updated_by:
+      type: varchar(50)

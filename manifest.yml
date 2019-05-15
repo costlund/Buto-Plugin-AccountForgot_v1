@@ -1,0 +1,29 @@
+version: '1.0'
+history:
+  '1.0':
+    date: '2019-05-15'
+    description: 'Manifest created.'
+plugin:
+  -
+    name: wf/yml
+    version: '1.1'
+  -
+    name: wf/mysql
+    version: '1.6'
+  -
+    name: i18n/translate_v1
+    version: '1.5'
+  -
+    name: mail/queue
+    version: '1.2'
+sys:
+  -
+    name: mercury
+    version:
+      - '1.0'
+php:
+  - '7.2'
+author: Claes Östlund
+links:
+description: ''
+third_part_software:

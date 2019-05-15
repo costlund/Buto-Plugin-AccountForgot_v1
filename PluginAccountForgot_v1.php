@@ -1,0 +1,192 @@
+<?php
+class PluginAccountForgot_v1{
+  private $settings = null;
+  public $mysql;
+  private $i18n = null;
+  function __construct() {
+    wfPlugin::includeonce('wf/yml');
+    wfPlugin::includeonce('wf/mysql');
+    $this->settings = wfPlugin::getPluginSettings('account/forgot_v1', true);
+    $this->mysql =new PluginWfMysql();
+    wfPlugin::includeonce('i18n/translate_v1');
+    $this->i18n = new PluginI18nTranslate_v1();
+    $this->i18n->path = '/plugin/account/forgot_v1/i18n';
+  }
+  /**
+   * FORGOT
+   */
+  public function page_forgot(){
+    $form = $this->getForm('forgot');
+    $form->setByTag($this->settings->get('data'), 'data');
+    $widget = wfDocument::createWidget('form/form_v1', 'render', $form->get());
+    wfDocument::renderElement(array($widget));
+  }
+  public function page_capture(){
+    $form = $this->getForm('forgot');
+    $widget = wfDocument::createWidget('form/form_v1', 'capture', $form->get());
+    wfDocument::renderElement(array($widget));
+  }
+  public function capture(){
+    $account = $this->db_account_select();
+    if(sizeof($account)>0){
+      wfPlugin::includeonce('mail/queue');
+      $mail = new PluginMailQueue(true);
+      $subject = $this->i18n->translateFromTheme('Restore password').' - '.wfServer::getHttpHost();
+      $body = $this->body_get($account);
+      $mail->send($subject, $body, wfRequest::get('email'), null, null, null, null, wfUser::getSession()->get('user_id'), 'account_forgot');
+    }
+    $alert = $this->i18n->translateFromTheme('Message was sent!');
+    return array("alert('$alert');location.reload()");
+  }
+  private function body_get($account){
+    $element = array();
+    $element[] = wfDocument::createHtmlElement('div', $this->i18n->translateFromTheme('Accounts connected to your email to restore.') );
+    $element[] = wfDocument::createHtmlElement('div', $this->i18n->translateFromTheme('Domain').': '.wfServer::getHttpHost().'.' );
+    foreach ($account as $key => $value) {
+      $id = wfCrypt::getUid();
+      $item = new PluginWfArray($value);
+      $url = wfServer::calcUrl().$this->settings->get('data/restore/url').'/id/'.$id;
+      $element[] = wfDocument::createHtmlElement('hr');
+      $element[] = wfDocument::createHtmlElement('div', array(
+          wfDocument::createHtmlElement('strong', 'Organisation'),
+          wfDocument::createHtmlElement('span', $item->get('org_name'))
+          ));
+      $element[] = wfDocument::createHtmlElement('div', array(
+          wfDocument::createHtmlElement('strong', 'Username'),
+          wfDocument::createHtmlElement('span', $item->get('username'))
+          ));
+      $element[] = wfDocument::createHtmlElement('div', array(wfDocument::createHtmlElement('a', $url, array('href' => $url)) ));
+      $this->db_account_forgot_insert(array('id' => $id, 'account_id' => $item->get('id'), 'session_id' => session_id()));
+    }
+    wfDocument::$capture=2;
+    wfDocument::renderElement($element);
+    $content = wfDocument::getContent();
+    return $content;
+  }
+  public function getElement($key, $dir = __DIR__){
+    return new PluginWfYml($dir."/element/$key.yml");
+  }
+  public function getForm($name, $dir = __DIR__){
+    return new PluginWfYml($dir.'/form/'.$name.'.yml');
+  }
+  /**
+   * RESTORE
+   */
+  public function widget_restore(){
+    $rs = $this->db_account_forgot_select_one(wfRequest::get('id'));
+    if($rs->get('id')){
+      /**
+       * Details
+       */
+      $element = $this->getElement('restore_details');
+      $element->setByTag($rs->get());
+      wfDocument::renderElement($element->get());
+      /**
+       * Form
+       */
+      $form = $this->getForm('restore');
+      $widget = wfDocument::createWidget('form/form_v1', 'render', $form->get());
+      wfDocument::renderElement(array($widget));
+      /**
+       * Script
+       */
+      $element = $this->getElement('script');
+      wfDocument::renderElement($element->get());
+      /**
+       * Done (hidden)
+       */
+      $element = $this->getElement('restore_done');
+      wfDocument::renderElement($element->get());
+    }else{
+      $element = $this->getElement('restore_invalid');
+      wfDocument::renderElement($element->get());
+    }
+  }
+  public function page_restore_capture(){
+    $form = $this->getForm('restore');
+    $widget = wfDocument::createWidget('form/form_v1', 'capture', $form->get());
+    wfDocument::renderElement(array($widget));
+  }
+  public function validate_password($field, $form, $data = array()){
+    $form = new PluginWfArray($form);
+    if($form->get("items/$field/is_valid")){
+      if(wfRequest::get('password')!= wfRequest::get('password2')){
+        $form->set("items/$field/is_valid", false);
+        $form->set("items/$field/errors/", $this->i18n->translateFromTheme('Passwords is not equal!'));
+      }
+    }
+    return $form->get();
+  }
+  public function restore_capture(){
+    $rs = $this->db_account_forgot_select_one(wfRequest::get('id'));
+    if($rs->get('id')){
+      $rs->set('password', wfRequest::get('password'));
+      $this->db_account_update_password($rs->get());
+      $this->db_account_forgot_update_success($rs->get());
+    }
+    return array("PluginAccountForgot_v1.restore_capture()");
+  }
+  /**
+   * DB
+   */
+  public function db_open(){
+    $this->mysql->open($this->settings->get('data/mysql'));
+  }
+  public function getSql($key, $dir = __DIR__){
+    $sql = new PluginWfYml($dir.'/mysql/sql.yml', $key);
+    /**
+     * Replace.
+     * If [replace._any_key] exist in sql we replace from param replace._any_key. 
+     */
+    if(strstr($sql->get('sql'), '[replace.')){
+      $replace = new PluginWfYml($dir.'/mysql/sql.yml', 'replace');
+      foreach ($replace->get() as $key => $value) {
+        $sql->set('sql', str_replace("[replace.$key]", $value, $sql->get('sql')));
+      }
+    }
+    return $sql;
+  }
+  public function db_account_select(){
+    $this->db_open();
+    $sql = $this->getSql('account_select');
+    /**
+     * Change sql from theme settings.
+     */
+    $sql->set('sql', $this->settings->get('data/sql_account_select'));
+    /**
+     * 
+     */
+    $this->mysql->execute($sql->get());
+    $rs = $this->mysql->getStmtAsArray();
+    return $rs;
+  }
+  public function db_account_forgot_insert($data){
+    $this->db_open();
+    $sql = $this->getSql('account_forgot_insert', __DIR__);
+    $sql->setByTag($data);
+    $this->mysql->execute($sql->get());
+    return null;
+  }
+  public function db_account_forgot_select_one($id){
+    $this->db_open();
+    $sql = $this->getSql('account_forgot_select_one');
+    $sql->setByTag(array('id' => $id));
+    $this->mysql->execute($sql->get());
+    $rs = new PluginWfArray($this->mysql->getStmtAsArrayOne());
+    return $rs;
+  }
+  public function db_account_update_password($data){
+    $this->db_open();
+    $sql = $this->getSql('account_update_password', __DIR__);
+    $sql->setByTag($data);
+    $this->mysql->execute($sql->get());
+    return null;
+  }
+  public function db_account_forgot_update_success($data){
+    $this->db_open();
+    $sql = $this->getSql('account_forgot_update_success', __DIR__);
+    $sql->setByTag($data);
+    $this->mysql->execute($sql->get());
+    return null;
+  }
+}
