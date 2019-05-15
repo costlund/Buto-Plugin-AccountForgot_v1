@@ -1,4 +1,4 @@
-# Buto-Plugin-Account_Forgot_v1
+# Buto-Plugin-AccountForgot_v1
 
 ## Settings
 ```
