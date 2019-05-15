@@ -39,27 +39,34 @@ class PluginAccountForgot_v1{
     return array("alert('$alert');location.reload()");
   }
   private function body_get($account){
+    $body = $this->getElement('body');
     $element = array();
-    $element[] = wfDocument::createHtmlElement('div', $this->i18n->translateFromTheme('Accounts connected to your email to restore.') );
-    $element[] = wfDocument::createHtmlElement('div', $this->i18n->translateFromTheme('Domain').': '.wfServer::getHttpHost().'.' );
     foreach ($account as $key => $value) {
       $id = wfCrypt::getUid();
       $item = new PluginWfArray($value);
       $url = wfServer::calcUrl().$this->settings->get('data/restore/url').'/id/'.$id;
-      $element[] = wfDocument::createHtmlElement('hr');
-      $element[] = wfDocument::createHtmlElement('div', array(
-          wfDocument::createHtmlElement('strong', 'Organisation'),
-          wfDocument::createHtmlElement('span', $item->get('org_name'))
-          ));
-      $element[] = wfDocument::createHtmlElement('div', array(
-          wfDocument::createHtmlElement('strong', 'Username'),
-          wfDocument::createHtmlElement('span', $item->get('username'))
-          ));
-      $element[] = wfDocument::createHtmlElement('div', array(wfDocument::createHtmlElement('a', $url, array('href' => $url)) ));
+      $item->set('url', $url);
+      /**
+       * Body item.
+       */
+      $body_item = $this->getElement('body_item');
+      $body_item->setByTag($item->get());
+      /**
+       * Merge element.
+       */
+      $element = array_merge($element, $body_item->get());
+      /**
+       * Db.
+       */
       $this->db_account_forgot_insert(array('id' => $id, 'account_id' => $item->get('id'), 'session_id' => session_id()));
     }
+    $body->setByTag(array('element' => $element));
+    $body->setByTag(wfServer::get());
+    /**
+     * Render element and get content.
+     */
     wfDocument::$capture=2;
-    wfDocument::renderElement($element);
+    wfDocument::renderElement($body->get());
     $content = wfDocument::getContent();
     return $content;
   }

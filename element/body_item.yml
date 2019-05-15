@@ -1,0 +1,32 @@
+-
+  type: p
+  innerHTML:
+    -
+      type: div
+      innerHTML:
+        -
+          type: strong
+          innerHTML: Organisation
+        -
+          type: span
+          innerHTML: rs:org_name
+    -
+      type: div
+      innerHTML:
+        -
+          type: strong
+          innerHTML: Username
+        -
+          type: span
+          innerHTML: rs:username
+    -
+      type: div
+      innerHTML:
+        -
+          type: strong
+          innerHTML: Link
+        -
+          type: a
+          attribute:
+            href: rs:url
+          innerHTML: rs:url

@@ -1,0 +1,25 @@
+-
+  type: div
+  settings:
+     globals:
+       -
+         path_to_key: 'settings/plugin/i18n/translate_v1/settings/path'
+         value: '/plugin/account/forgot_v1/i18n'
+  innerHTML:
+    -
+      type: div
+      innerHTML: Accounts connected to your email to restore.
+    -
+      type: div
+      innerHTML:
+        -
+          type: strong
+          innerHTML: Domain
+        -
+          type: span
+          settings:
+            i18n: false
+          innerHTML: rs:HTTP_HOST
+    -
+      type: div
+      innerHTML: rs:element
