@@ -54,3 +54,15 @@ PluginWfBootstrapjs.modal({id: 'modal_account_forgot', url: '/account_forgot/for
 ```
 /plugin/account/forgot_v1/mysql/schema.yml
 ```
+
+# Usage
+
+## Send method
+
+Send restore password to only one account by account id.
+
+```
+wfPlugin::includeonce('account/forgot_v1');
+$send_account = new PluginAccountForgot_v1();
+$send_account->send('_account_id_');
+```

@@ -27,7 +27,12 @@ class PluginAccountForgot_v1{
     wfDocument::renderElement(array($widget));
   }
   public function capture(){
-    $account = $this->db_account_select();
+    $data = $this->send();
+    $alert = $this->i18n->translateFromTheme('Message was sent!');
+    return array("alert('$alert');location.reload()");
+  }
+  public function send($account_id = null){
+    $account = $this->db_account_select($account_id);
     if(sizeof($account)>0){
       wfPlugin::includeonce('mail/queue');
       $mail = new PluginMailQueue(true);
@@ -35,8 +40,7 @@ class PluginAccountForgot_v1{
       $body = $this->body_get($account);
       $mail->send($subject, $body, wfRequest::get('email'), null, null, null, null, wfUser::getSession()->get('user_id'), 'account_forgot');
     }
-    $alert = $this->i18n->translateFromTheme('Message was sent!');
-    return array("alert('$alert');location.reload()");
+    return $account;
   }
   private function body_get($account){
     $body = $this->getElement('body');
@@ -153,7 +157,7 @@ class PluginAccountForgot_v1{
     }
     return $sql;
   }
-  public function db_account_select(){
+  public function db_account_select($account_id = null){
     $this->db_open();
     $sql = $this->getSql('account_select');
     /**
@@ -165,6 +169,17 @@ class PluginAccountForgot_v1{
      */
     $this->mysql->execute($sql->get());
     $rs = $this->mysql->getStmtAsArray();
+    /**
+     * Remove other account if account_id is set.
+     */
+    if($account_id){
+      foreach ($rs as $key => $value) {
+        $i = new PluginWfArray($value);
+        if($value['id']!=$account_id){
+          unset($rs[$key]);
+        }
+      }
+    }
     return $rs;
   }
   public function db_account_forgot_insert($data){
