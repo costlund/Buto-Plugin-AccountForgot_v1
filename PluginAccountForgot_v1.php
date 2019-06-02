@@ -131,7 +131,7 @@ class PluginAccountForgot_v1{
   public function restore_capture(){
     $rs = $this->db_account_forgot_select_one(wfRequest::get('id'));
     if($rs->get('id')){
-      $rs->set('password', wfRequest::get('password'));
+      $rs->set('password', wfCrypt::getHashAndSaltAsString(wfRequest::get('password')));
       $this->db_account_update_password($rs->get());
       $this->db_account_forgot_update_success($rs->get());
     }
