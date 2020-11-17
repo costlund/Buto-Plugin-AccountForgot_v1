@@ -9,16 +9,16 @@ history:
 plugin:
   -
     name: wf/yml
-    version: '1.1'
+    version: 1.2.2
   -
     name: wf/mysql
-    version: '1.6'
+    version: 1.11.0
   -
     name: i18n/translate_v1
-    version: '1.5'
+    version: 1.7.0
   -
     name: mail/queue
-    version: '1.2'
+    version: 1.4.0
 sys:
   -
     name: mercury
@@ -26,7 +26,7 @@ sys:
       - '1.0'
 php:
   - '7.2'
-author: Claes Östlund
-links:
+author: 'Claes Östlund'
+links: null
 description: ''
-third_part_software:
+third_part_software: null
