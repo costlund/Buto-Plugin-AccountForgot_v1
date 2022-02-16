@@ -50,14 +50,14 @@ Open modal.
 PluginWfBootstrapjs.modal({id: 'modal_account_forgot', url: '/account_forgot/forgot', lable: PluginI18nJson_v1.i18n('Forgot?'), size: 'sm'});
 ```
 
-#Schema
+## Schema
 ```
 /plugin/account/forgot_v1/mysql/schema.yml
 ```
 
-# Usage
+## Usage
 
-## Send method
+### Send method
 
 Send restore password to only one account by account id.
 
