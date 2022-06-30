@@ -1,5 +1,9 @@
-version: 1.1.4
+version: 1.1.5
 history:
+  1.1.5:
+    date: '2022-06-30'
+    title: Versions
+    description: 'Versions update.'
   1.1.4:
     date: '2022-06-07'
     title: Versions
@@ -28,13 +32,13 @@ plugin:
     version: 1.4.0
   -
     name: wf/mysql
-    version: 1.14.7
+    version: 1.14.8
   -
     name: i18n/translate_v1
     version: 1.7.8
   -
     name: mail/queue
-    version: 1.8.4
+    version: 1.9.0
 sys:
   -
     name: mercury
