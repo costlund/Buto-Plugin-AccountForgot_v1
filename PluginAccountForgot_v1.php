@@ -149,10 +149,10 @@ class PluginAccountForgot_v1{
      * Replace.
      * If [replace._any_key] exist in sql we replace from param replace._any_key. 
      */
-    if(strstr($sql->get('sql'), '[replace.')){
+    if(wfPhpfunc::strstr($sql->get('sql'), '[replace.')){
       $replace = new PluginWfYml($dir.'/mysql/sql.yml', 'replace');
       foreach ($replace->get() as $key => $value) {
-        $sql->set('sql', str_replace("[replace.$key]", $value, $sql->get('sql')));
+        $sql->set('sql', wfPhpfunc::str_replace("[replace.$key]", $value, $sql->get('sql')));
       }
     }
     return $sql;
